@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title><b>STOPWATCH</b></title>
+<style>
+  body {
+    
+    transition: background-color 2s ease;
+    background: #121212;
+    color: #0ff;
+    font-family: 'Courier New', Courier, monospace;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+  }
+
+  .stopwatch-box {
+    background: #222;
+    border-radius: 15px;
+    padding: 50px 40px;
+    width: 600px;
+    box-shadow: 0 0 15px #0ff;
+    text-align: center;
+  }
+
+  h2 {
+    margin-bottom: 20px;
+    font-weight: 700;
+  }
+
+  #time-display {
+    font-size: 3.8rem;
+    font-weight: 900;
+    letter-spacing: 0.15em;
+    background: rgba(0, 255, 255, 0.15);
+    padding: 20px 25px;
+    border-radius: 15px;
+    margin-bottom: 20px;
+    color: #0ff;
+    text-shadow: 0 0 10px #0ff;
+    white-space: nowrap;
+  }
+
+  .controls button {
+    background: #0ff;
+    border: none;
+    color: #000;
+    font-weight: 700;
+    padding: 12px 18px;
+    margin: 5px 8px;
+    border-radius: 10px;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: background 0.3s ease;
+    min-width: 80px;
+  }
+
+  .controls button:hover:not(:disabled) {
+    background: #00bbbb;
+  }
+
+  .controls button:disabled {
+    background: #004d4d;
+    cursor: not-allowed;
+    color: #0ff6;
+  }
+
+  #lap-times {
+    margin-top: 20px;
+    max-height: 150px;
+    overflow-y: auto;
+    text-align: left;
+    padding-left: 15px;
+  }
+
+  #lap-times li {
+    border-bottom: 1px solid #0ff4;
+    padding: 6px 0;
+    font-size: 1.1rem;
+    letter-spacing: 0.05em;
+  }
+</style>
+</head>
+<body>
+
+<div class="stopwatch-box">
+  <h2>Stopwatch</h2>
+  <div id="time-display">00:00:00.00</div>
+  <div class="controls">
+    <button id="start">Start</button>
+    <button id="pause" disabled>Pause</button>
+    <button id="reset" disabled>Reset</button>
+    <button id="lap" disabled>Lap</button>
+  </div>
+  <ul id="lap-times"></ul>
+</div>
+
+<script>
+  let startTime = 0;
+  let elapsedTime = 0;
+  let timerInterval;
+  let running = false;
+
+  const timeDisplay = document.getElementById('time-display');
+  const startBtn = document.getElementById('start');
+  const pauseBtn = document.getElementById('pause');
+  const resetBtn = document.getElementById('reset');
+  const lapBtn = document.getElementById('lap');
+  const lapTimesList = document.getElementById('lap-times');
+
+  function formatTime(time) {
+    const hrs = Math.floor(time / 3600000);
+    const mins = Math.floor((time % 3600000) / 60000);
+    const secs = Math.floor((time % 60000) / 1000);
+    const ms = Math.floor((time % 1000) / 10);
+
+    return (
+      (hrs ? (hrs < 10 ? '0' + hrs : hrs) + ':' : '') +
+      (mins < 10 ? '0' + mins : mins) + ':' +
+      (secs < 10 ? '0' + secs : secs) + '.' +
+      (ms < 10 ? '0' + ms : ms)
+    );
+  }
+
+  function startTimer() {
+    if (!running) {
+      running = true;
+      startTime = Date.now() - elapsedTime;
+      timerInterval = setInterval(() => {
+        elapsedTime = Date.now() - startTime;
+        timeDisplay.textContent = formatTime(elapsedTime);
+      }, 10);
+      startBtn.disabled = true;
+      pauseBtn.disabled = false;
+      resetBtn.disabled = false;
+      lapBtn.disabled = false;
+    }
+  }
+
+  function pauseTimer() {
+    if (running) {
+      running = false;
+      clearInterval(timerInterval);
+      startBtn.disabled = false;
+      pauseBtn.disabled = true;
+      lapBtn.disabled = true;
+    }
+  }
+
+  function resetTimer() {
+    running = false;
+    clearInterval(timerInterval);
+    elapsedTime = 0;
+    timeDisplay.textContent = "00:00:00.00";
+    lapTimesList.innerHTML = '';
+    startBtn.disabled = false;
+    pauseBtn.disabled = true;
+    resetBtn.disabled = true;
+    lapBtn.disabled = true;
+  }
+
+  function recordLap() {
+    if (running) {
+      const lapItem = document.createElement('li');
+      lapItem.textContent = formatTime(elapsedTime);
+      lapTimesList.appendChild(lapItem);
+      lapTimesList.scrollTop = lapTimesList.scrollHeight; // Auto scroll to bottom
+    }
+  }
+
+  startBtn.addEventListener('click', startTimer);
+  pauseBtn.addEventListener('click', pauseTimer);
+  resetBtn.addEventListener('click', resetTimer);
+  lapBtn.addEventListener('click', recordLap);
+</script>
+
+</body>
+</html>
